@@ -129,6 +129,20 @@
       cursor: not-allowed;
     }
 
+    button[data-sum="doubles"] {
+      background-color: #ffde59;       /* Yellow background similar to a gold tone */
+      border-color: #ffde59;           /* Matching border */
+      color: #000;                     /* Black text for contrast */
+      box-shadow: 0 0 8px rgba(255, 222, 89, 0.4); /* Subtle glow matching the yellow */
+    }
+
+    button[data-sum="doubles"]:hover {
+      background-color: #ffff80;       /* Lighter yellow on hover */
+      color: #0f0f0f;
+      box-shadow: 0 0 15px rgba(255, 222, 89, 0.6);
+    }
+
+
     /********************************************************
      *               INPUTS & SELECT
      ********************************************************/
@@ -242,6 +256,28 @@
       50%  { transform: translate(-50%, -50%) scale(1.0); }
       100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
     }
+
+    #dice-buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    #dice-buttons .row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+    }
+
+
+    #dice-buttons button {
+      flex: 0 0 calc(16.66% - 8px); 
+      /* Each button takes about 1/6th of the container width, minus gap */
+    }
+
+
   </style>
 </head>
 <body>
@@ -293,20 +329,26 @@
       <p>It's <strong id="current-player-name"></strong>'s turn</p>
 
       <!-- Manual Dice Buttons -->
-      <div id="dice-buttons" style="margin-top: 20px;">
-        <button data-sum="2">2</button>
-        <button data-sum="3">3</button>
-        <button data-sum="4">4</button>
-        <button data-sum="5">5</button>
-        <button data-sum="6">6</button>
-        <button data-sum="7">7</button>
-        <button data-sum="8">8</button>
-        <button data-sum="9">9</button>
-        <button data-sum="10">10</button>
-        <button data-sum="11">11</button>
-        <button data-sum="12">12</button>
-        <button data-sum="doubles">DOUBLES</button>
+      <div id="dice-buttons">
+        <div class="row">
+          <button data-sum="2">2</button>
+          <button data-sum="3">3</button>
+          <button data-sum="4">4</button>
+          <button data-sum="5">5</button>
+          <button data-sum="6">6</button>
+          <button data-sum="7">7</button>
+        </div>
+        <div class="row">
+          <button data-sum="8">8</button>
+          <button data-sum="9">9</button>
+          <button data-sum="10">10</button>
+          <button data-sum="11">11</button>
+          <button data-sum="12">12</button>
+          <button data-sum="doubles">X2</button>
+        </div>
       </div>
+      
+      
 
       <!-- Bank Button -->
       <div>
@@ -521,9 +563,10 @@
     function endRound(rolledSeven) {
       isRoundActive = false;
 
-      if (!rolledSeven) {
-        alert(`All players have banked or are out. Round ${currentRound} is over.`);
-      }
+      // Remove alert for normal ends; keep any special handling for rolledSeven if desired.
+      // if (!rolledSeven) {
+      //   alert(`All players have banked or are out. Round ${currentRound} is over.`);
+      // }
 
       if (currentRound < totalRounds) {
         startNewRound();
@@ -531,6 +574,7 @@
         endGame();
       }
     }
+
 
     function startNewRound() {
       currentRound++;
