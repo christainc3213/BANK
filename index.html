@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>BANK! - The Game </title>
+  <title>BANK! - The Game</title>
   <!-- Google Fonts (Inter) -->
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link 
@@ -33,10 +33,50 @@
       100% { background-position: 0% 50%; }
     }
 
+    #darken-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1900;
+      opacity: 0;
+      transition: opacity 0.5s ease;  /* Add transition for smooth fade */
+      pointer-events: none;           /* Ensure it doesn't block interactions */
+    }
+
+
+    /* Round overlay styling */
+    #round-overlay {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 5rem;
+      color: #00ffff;
+      text-shadow: 0 0 12px rgba(0,255,255,0.8);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 2000;
+      display: none;
+      padding: 20px 40px;
+      background: #000;   
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,255,255,0.3);
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translate(-50%, -60%); }
+      25% { opacity: 1; transform: translate(-50%, -50%); }
+      75% { opacity: 1; transform: translate(-50%, -50%); }
+      100% { opacity: 0; transform: translate(-50%, -40%); }
+    }
+
     /********************************************************
      *               CONTAINER / LAYOUT
      ********************************************************/
     .container {
+      position: relative;
       max-width: 900px;
       margin: 40px auto;
       padding: 30px;
@@ -44,7 +84,6 @@
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
       border: 1px solid rgba(0,255,255,0.1);
-      position: relative;
       text-align: center;
     }
 
@@ -60,16 +99,22 @@
       }
     }
     .flash-bust {
-      animation: colorFlash 1s infinite;
+      animation: colorFlash 0.5s infinite;
     }
 
     /********************************************************
      *               TITLE / HEADINGS
      ********************************************************/
+    h1 span {
+      display: inline-block;
+      opacity: 0;
+      animation: letterFlyIn 0.01s ease forwards;
+      white-space: pre;
+    }
     h1 {
       font-size: 3rem;
-      color: #00ffff;
-      text-shadow: 0 0 6px rgba(0,255,255,0.7);
+      color: #fff;
+      text-shadow: 0 0 4px rgba(255,255,255,0.7);
       margin-bottom: 25px;
       font-weight: 700;
     }
@@ -93,7 +138,6 @@
       text-shadow: 0 0 6px rgba(0,255,255,0.5);
       margin-bottom: 10px;
     }
-
     p {
       font-size: 1.3rem;
       margin-bottom: 10px;
@@ -128,20 +172,17 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-
     button[data-sum="doubles"] {
-      background-color: #ffde59;       /* Yellow background similar to a gold tone */
-      border-color: #ffde59;           /* Matching border */
-      color: #000;                     /* Black text for contrast */
-      box-shadow: 0 0 8px rgba(255, 222, 89, 0.4); /* Subtle glow matching the yellow */
+      background-color: #ffde59;
+      border-color: #ffde59;
+      color: #000;
+      box-shadow: 0 0 8px rgba(255, 222, 89, 0.4);
     }
-
     button[data-sum="doubles"]:hover {
-      background-color: #ffff80;       /* Lighter yellow on hover */
+      background-color: #ffff80;
       color: #0f0f0f;
       box-shadow: 0 0 15px rgba(255, 222, 89, 0.6);
     }
-
 
     /********************************************************
      *               INPUTS & SELECT
@@ -257,78 +298,111 @@
       100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
     }
 
-    #dice-buttons {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-top: 20px;
+    /* Base styling for images */
+    #tanner {
+      position: absolute;
+      width: 150px;
+      bottom: -150px;
+      opacity: 0;
+    }
+    #derek {
+      position: absolute;
+      width: 100px;
+      bottom: -150px;
+      opacity: 0;
+    }
+    #tanner {
+      left: 10%;
+      animation: flyInFromBottom 1s ease-out forwards;
+      animation-delay: 8s;
+    }
+    #derek {
+      right: 10%;
+      animation: flyInFromBottom 1s ease-out forwards;
+      animation-delay: 5s;
+    }
+    @keyframes flyInFromBottom {
+      0% {
+        bottom: -150px;
+        opacity: 0;
+      }
+      100% {
+        bottom: 20px;
+        opacity: 1;
+      }
     }
 
-    #dice-buttons .row {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
+    @keyframes letterFlyIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
     }
-
-
-    #dice-buttons button {
-      flex: 0 0 calc(16.66% - 8px); 
-      /* Each button takes about 1/6th of the container width, minus gap */
-    }
-
-
   </style>
 </head>
 <body>
+  <!-- Round Overlay -->
+  <div id="darken-overlay"></div>
+  <div id="round-overlay"></div>
+
   <!-- Explosion overlay -->
   <div id="boom">
     <div class="blast"></div>
   </div>
 
-  <!-- Main Container -->
   <div class="container" id="main-container">
     <h1>BANK! - The Game</h1>
 
-    <!-- Setup Section (Hides after Start Game) -->
     <div id="setup-section">
-      <p>Enter players' names, pick the number of rounds, then start the game. You will roll real dice and choose the button that matches the outcome.</p>
-      <p></p>
-      <p></p>
-
-      <!-- Add Players -->
+      <p>Add your friends and you're ready to roll</p>
+      <br>
+      <br>
       <div>
-        <label for="player-name">Add Player:</label>
         <input type="text" id="player-name" placeholder="Player Name">
         <button id="add-player-btn">Add Player</button>
       </div>
-
       <ul id="players-ul" style="list-style: none; padding: 0;"></ul>
-
-      <!-- Select Rounds -->
       <div>
-        <label for="round-count">Select Rounds (1-20):</label>
-        <select id="round-count"></select>
+        <label for="round-count">Select Rounds:</label>
+        <select id="round-count">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10" selected>10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+          <option value="17">17</option>
+          <option value="18">18</option>
+          <option value="19">19</option>
+          <option value="20">20</option>
+        </select>
       </div>
-      
-      <!-- Start Game -->
+      <br>
       <div>
+        <img id="tanner" src="tanner.png" alt="Tanner">
         <button id="start-game-btn">Start Game</button>
+        <img id="derek" src="derek.png" alt="Derek">
       </div>
     </div>
 
-    <!-- Main Game Section (Initially hidden) -->
     <div id="game-section" class="hidden">
-      <!-- Round / Total Rounds -->
       <h2>Round: <span id="current-round">0</span> / <span id="total-rounds">0</span></h2>
-
-      <!-- BIG Bank Number -->
       <h1 id="bank-amount">0</h1>
-
-      <!-- Turn & Actions -->
       <p>It's <strong id="current-player-name"></strong>'s turn</p>
-
-      <!-- Manual Dice Buttons -->
       <div id="dice-buttons">
         <div class="row">
           <button data-sum="2">2</button>
@@ -347,15 +421,10 @@
           <button data-sum="doubles">X2</button>
         </div>
       </div>
-      
-      
-
-      <!-- Bank Button -->
       <div>
         <button id="open-bank-menu-btn">Bank</button>
+        <button id="undo-btn">Undo</button>
       </div>
-
-      <!-- Bank Menu Form (Initially hidden) -->
       <div id="bank-menu">
         <h4>Select players who want to BANK now:</h4>
         <form id="bank-form" action="javascript:void(0);">
@@ -363,17 +432,57 @@
           <button type="submit" id="submit-bank-btn" style="margin-top: 20px;">BANK SELECTED</button>
         </form>
       </div>
-
-      <!-- Player Status -->
       <h3>Players</h3>
       <div id="players-list"></div>
     </div>
   </div>
 
   <script>
-    /********************************************************
-     *                  GLOBAL STATE & VARIABLES
-     ********************************************************/
+    window.addEventListener('load', () => {
+      const title = document.querySelector('h1');
+      const text = title.textContent;
+      title.textContent = '';
+      text.split('').forEach((char, index) => {
+        if(char === ' ') {
+          title.appendChild(document.createTextNode(' '));
+        } else {
+          const span = document.createElement('span');
+          span.textContent = char;
+          span.style.animationDelay = `${index * 0.1}s`;
+          title.appendChild(span);
+        }
+      });
+    });
+
+    function showRoundOverlay(roundNumber) {
+      const darken = document.getElementById('darken-overlay');
+      const overlay = document.getElementById('round-overlay');
+
+      overlay.textContent = `Round ${roundNumber}`;
+      
+      // Start by ensuring the overlay elements are in the document
+      darken.style.display = 'block';
+      overlay.style.display = 'block';
+      
+      // Trigger fade in for dark overlay and show round overlay animation
+      setTimeout(() => {
+        darken.style.opacity = '1';  // Fade in the dark overlay
+        overlay.style.animation = 'fadeInOut 2s forwards';
+      }, 10);
+
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        darken.style.opacity = '0';  // Fade out the dark overlay
+      }, 2000);
+
+      // Optionally hide the dark overlay after the fade-out transition completes
+      setTimeout(() => {
+        darken.style.display = 'none';
+      }, 2500);
+    }
+
+
+
     let players = [];  
     let totalRounds = 20;
     let currentRound = 0;
@@ -381,95 +490,63 @@
     let bankTotal = 0;
     let roundRollCount = 0;
     let isRoundActive = false;
+    let history = [];
 
-    // DOM Elements
     const setupSection         = document.getElementById('setup-section');
     const gameSection          = document.getElementById('game-section');
-
     const playerNameInput      = document.getElementById('player-name');
     const addPlayerBtn         = document.getElementById('add-player-btn');
     const playersUl            = document.getElementById('players-ul');
     const startGameBtn         = document.getElementById('start-game-btn');
     const roundCountSelect     = document.getElementById('round-count');
-
     const currentRoundSpan     = document.getElementById('current-round');
     const totalRoundsSpan      = document.getElementById('total-rounds');
     const bankAmountSpan       = document.getElementById('bank-amount');
     const currentPlayerName    = document.getElementById('current-player-name');
     const playersListDiv       = document.getElementById('players-list');
-
-    // Bank elements
     const openBankMenuBtn      = document.getElementById('open-bank-menu-btn');
     const bankMenuDiv          = document.getElementById('bank-menu');
     const bankForm             = document.getElementById('bank-form');
     const bankPlayersCheckboxes= document.getElementById('bank-players-checkboxes');
-
-    // Explosion overlay & container for flashing
+    const undoBtn              = document.getElementById('undo-btn');
     const boomOverlay          = document.getElementById('boom');
     const mainContainer        = document.getElementById('main-container');
 
-    /********************************************************
-     *                  EVENT LISTENERS
-     ********************************************************/
     addPlayerBtn.addEventListener('click', () => {
       const name = playerNameInput.value.trim();
       if (!name) return;
-      
-      players.push({
-        name,
-        score: 0,
-        isActive: true,
-        hasBankedThisRound: false
-      });
+      players.push({ name, score: 0, isActive: true, hasBankedThisRound: false });
       updatePlayersListUI();
       playerNameInput.value = '';
     });
 
     startGameBtn.addEventListener('click', () => {
-      if (players.length === 0) {
-        alert('Please add at least one player.');
-        return;
-      }
-
+      if (players.length === 0) { alert('Please add at least one player.'); return; }
       totalRounds = parseInt(roundCountSelect.value, 10);
-
       setupSection.classList.add('hidden');
       gameSection.classList.remove('hidden');
-
       currentRound = 1;
       bankTotal = 0;
       roundRollCount = 0;
       isRoundActive = true;
-
-      players.forEach(p => {
-        p.score = 0;
-        p.isActive = true;
-        p.hasBankedThisRound = false;
-      });
-
+      players.forEach(p => { p.score = 0; p.isActive = true; p.hasBankedThisRound = false; });
       currentPlayerIndex = 0;
+      history = [];
+      showRoundOverlay(currentRound);
       updateUI();
     });
 
     document.getElementById('dice-buttons').addEventListener('click', (e) => {
-      if (e.target.tagName !== 'BUTTON') return;
-      if (!isRoundActive) return;
-
+      if (e.target.tagName !== 'BUTTON' || !isRoundActive) return;
       const sumString = e.target.getAttribute('data-sum');
-      let sum = 0;
-      let isDoubles = false;
-
-      if (sumString === 'doubles') {
-        isDoubles = true;
-      } else {
-        sum = parseInt(sumString, 10);
-      }
-
+      let sum = 0, isDoubles = false;
+      if (sumString === 'doubles') { isDoubles = true; } 
+      else { sum = parseInt(sumString, 10); }
       handleRoll(sum, isDoubles);
     });
 
     openBankMenuBtn.addEventListener('click', () => {
-      if (bankMenuDiv.style.display === 'none' || bankMenuDiv.style.display === '') {
+      if (!bankMenuDiv.style.display || bankMenuDiv.style.display === 'none') {
         renderBankPlayersCheckboxes();
         bankMenuDiv.style.display = 'block';
       } else {
@@ -478,41 +555,55 @@
     });
 
     bankForm.addEventListener('submit', handleMultiBank);
+    undoBtn.addEventListener('click', handleUndo);
 
     function handleRoll(sum, isDoubles) {
+      if (!isRoundActive) return;
+      history.push({
+        bankTotal, roundRollCount, currentPlayerIndex,
+        players: JSON.parse(JSON.stringify(players))
+      });
       roundRollCount++;
-
-      if (roundRollCount <= 3) {
-        if (sum === 7) {
-          bankTotal += 70;
-        } else {
-          bankTotal += sum; 
-        }
-      } else {
-        if (sum === 7) {
-          doBustEffect();
-          return;
-        } else if (isDoubles) {
-          bankTotal *= 2;  
-        } else {
-          bankTotal += sum;
-        }
+      let amountToAdd = 0;
+      if (roundRollCount <= 3) { amountToAdd = (sum === 7) ? 70 : sum; }
+      else {
+        if (sum === 7) { doBustEffect(); return; }
+        else if (isDoubles) { amountToAdd = bankTotal; }
+        else { amountToAdd = sum; }
       }
-
+      animateBankTotalIncrease(amountToAdd);
       goToNextPlayer();
       updateUI();
+    }
+
+    function animateBankTotalIncrease(amountToAdd) {
+      const steps = 20;
+      const stepAmount = amountToAdd / steps;
+      const stepTime = 25;
+      let currentStep = 0;
+      let displayedValue = bankTotal;
+      const targetValue = bankTotal + amountToAdd;
+      const interval = setInterval(() => {
+        if (currentStep < steps) {
+          displayedValue += stepAmount;
+          bankAmountSpan.textContent = Math.floor(displayedValue);
+          currentStep++;
+        } else {
+          clearInterval(interval);
+          bankTotal = targetValue;
+          updateUI();
+        }
+      }, stepTime);
     }
 
     function doBustEffect() {
       isRoundActive = false;
       mainContainer.classList.add('flash-bust');
-      
       let startVal = bankTotal;
       let steps = 40;
       let stepTime = 1000 / steps;
       let decrement = startVal / steps;
       let currentVal = startVal;
-
       const countdown = setInterval(() => {
         currentVal -= decrement;
         if (currentVal <= 0) {
@@ -530,148 +621,131 @@
 
     function handleMultiBank() {
       const checkboxes = document.querySelectorAll('input[name="bank-player"]:checked');
-      if (checkboxes.length === 0) {
-        alert('No players selected to bank.');
-        return;
-      }
-
+      if (checkboxes.length === 0) { alert('No players selected to bank.'); return; }
+      history.push({
+        bankTotal, roundRollCount, currentPlayerIndex,
+        players: JSON.parse(JSON.stringify(players))
+      });
       checkboxes.forEach(checkbox => {
         const playerIndex = parseInt(checkbox.value, 10);
         const player = players[playerIndex];
-        
         if (player && player.isActive) {
           player.score += bankTotal;
           player.hasBankedThisRound = true;
           player.isActive = false;
         }
       });
-
       bankMenuDiv.style.display = 'none';
-
-      if (!players[currentPlayerIndex].isActive) {
-        goToNextPlayer();
-      }
-
+      if (!players[currentPlayerIndex].isActive) { goToNextPlayer(); }
       const anyActivePlayers = players.some(p => p.isActive);
-      if (!anyActivePlayers) {
-        endRound(false);
-      } else {
-        updateUI();
-      }
+      if (!anyActivePlayers) { endRound(false); }
+      else { updateUI(); }
     }
 
     function endRound(rolledSeven) {
       isRoundActive = false;
-
-      // Remove alert for normal ends; keep any special handling for rolledSeven if desired.
-      // if (!rolledSeven) {
-      //   alert(`All players have banked or are out. Round ${currentRound} is over.`);
-      // }
-
-      if (currentRound < totalRounds) {
-        startNewRound();
+      if (!rolledSeven) {
+        if (currentRound < totalRounds) { startNewRound(); }
+        else { endGame(); }
       } else {
-        endGame();
+        if (currentRound < totalRounds) { startNewRound(); }
+        else { endGame(); }
       }
     }
 
-
     function startNewRound() {
       currentRound++;
+      showRoundOverlay(currentRound);  // Show overlay for new round
       bankTotal = 0;
       roundRollCount = 0;
       isRoundActive = true;
-
       players.forEach(p => {
         p.isActive = true;
         p.hasBankedThisRound = false;
       });
-
       currentPlayerIndex = 0;
       updateUI();
     }
 
     function endGame() {
-        isRoundActive = false;
-        const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
-
-        // Create an overlay for final results
-        const finalResultsDiv = document.createElement('div');
-        finalResultsDiv.id = 'final-results';
-        finalResultsDiv.style.position = 'fixed';
-        finalResultsDiv.style.top = '0';
-        finalResultsDiv.style.left = '0';
-        finalResultsDiv.style.width = '100%';
-        finalResultsDiv.style.height = '100%';
-        finalResultsDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        finalResultsDiv.style.display = 'flex';
-        finalResultsDiv.style.flexDirection = 'column';
-        finalResultsDiv.style.alignItems = 'center';
-        finalResultsDiv.style.justifyContent = 'center';
-        finalResultsDiv.style.zIndex = '1000';
-        finalResultsDiv.innerHTML = `
-          <h2>Game Over!</h2>
-          <h3>Final Rankings:</h3>
-          <div id="final-scores"></div>
-          <button id="play-again-btn" style="margin-top: 20px; padding: 10px 20px;">Play Again</button>
+      isRoundActive = false;
+      const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
+      const finalResultsDiv = document.createElement('div');
+      finalResultsDiv.id = 'final-results';
+      finalResultsDiv.style.position = 'fixed';
+      finalResultsDiv.style.top = '0';
+      finalResultsDiv.style.left = '0';
+      finalResultsDiv.style.width = '100%';
+      finalResultsDiv.style.height = '100%';
+      finalResultsDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+      finalResultsDiv.style.display = 'flex';
+      finalResultsDiv.style.flexDirection = 'column';
+      finalResultsDiv.style.alignItems = 'center';
+      finalResultsDiv.style.justifyContent = 'center';
+      finalResultsDiv.style.zIndex = '1000';
+      finalResultsDiv.innerHTML = `
+        <h2>Game Over!</h2>
+        <h3>Final Rankings:</h3>
+        <div id="final-scores"></div>
+        <button id="play-again-btn" style="margin-top: 20px; padding: 10px 20px;">Play Again</button>
+      `;
+      document.body.appendChild(finalResultsDiv);
+      const finalScoresDiv = finalResultsDiv.querySelector('#final-scores');
+      let html = '';
+      sortedPlayers.forEach((p, index) => {
+        html += `
+          <div class="player-card">
+            <h4>${index + 1}. ${p.name}</h4>
+            <p>Score: ${p.score}</p>
+          </div>
         `;
-        document.body.appendChild(finalResultsDiv);
-
-        const finalScoresDiv = finalResultsDiv.querySelector('#final-scores');
-        let html = '';
-        sortedPlayers.forEach((p, index) => {
-          html += `
-            <div class="player-card">
-              <h4>${index + 1}. ${p.name}</h4>
-              <p>Score: ${p.score}</p>
-            </div>
-          `;
+      });
+      finalScoresDiv.innerHTML = html;
+      function resetGame() {
+        currentRound = 1;
+        bankTotal = 0;
+        roundRollCount = 0;
+        isRoundActive = true;
+        players.forEach(p => {
+          p.score = 0;
+          p.isActive = true;
+          p.hasBankedThisRound = false;
         });
-        finalScoresDiv.innerHTML = html;
-
-        function resetGame() {
-          currentRound = 1;
-          bankTotal = 0;
-          roundRollCount = 0;
-          isRoundActive = true;
-          players.forEach(p => {
-            p.score = 0;
-            p.isActive = true;
-            p.hasBankedThisRound = false;
-          });
-          currentPlayerIndex = 0;
-          updateUI();
-        }
-
-
-        document.getElementById('play-again-btn').addEventListener('click', () => {
-          document.body.removeChild(finalResultsDiv);
-          resetGame();
-        });
+        currentPlayerIndex = 0;
+        history = [];
+        updateUI();
+        document.body.removeChild(finalResultsDiv);
       }
-
+      document.getElementById('play-again-btn').addEventListener('click', resetGame);
+    }
 
     function goToNextPlayer() {
       let originalIndex = currentPlayerIndex;
       do {
         currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
       } while (!players[currentPlayerIndex].isActive && currentPlayerIndex !== originalIndex);
-
-      if (!players[currentPlayerIndex].isActive) {
-        endRound(false);
-      }
+      if (!players[currentPlayerIndex].isActive) { endRound(false); }
     }
 
     function triggerExplosion() {
       boomOverlay.style.display = 'block';
-      setTimeout(() => {
-        boomOverlay.style.display = 'none';
-      }, 500);
+      setTimeout(() => { boomOverlay.style.display = 'none'; }, 500);
+    }
+
+    function handleUndo() {
+      if (history.length === 0) { alert('Nothing to undo.'); return; }
+      const lastState = history.pop();
+      bankTotal = lastState.bankTotal;
+      roundRollCount = lastState.roundRollCount;
+      currentPlayerIndex = lastState.currentPlayerIndex;
+      players = lastState.players;
+      isRoundActive = true;
+      updateUI();
     }
 
     function updatePlayersListUI() {
       playersUl.innerHTML = '';
-      players.forEach((p) => {
+      players.forEach(p => {
         const li = document.createElement('li');
         li.textContent = p.name;
         playersUl.appendChild(li);
@@ -701,10 +775,7 @@
       totalRoundsSpan.textContent = totalRounds;
       bankAmountSpan.textContent = bankTotal;
       currentPlayerName.textContent = players[currentPlayerIndex]?.name || '';
-
-      // Sort players descending by score
       const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
-
       let html = '';
       sortedPlayers.forEach(p => {
         const cardClass = p.isActive ? '' : 'banked';
@@ -715,17 +786,10 @@
         `;
       });
       playersListDiv.innerHTML = html;
-
-      if (bankMenuDiv.style.display === 'block') {
-        renderBankPlayersCheckboxes();
-      }
-
+      if (bankMenuDiv.style.display === 'block') { renderBankPlayersCheckboxes(); }
       const doublesBtn = document.querySelector('button[data-sum="doubles"]');
-      if (roundRollCount < 3) {
-        doublesBtn.disabled = true;
-      } else {
-        doublesBtn.disabled = false;
-      }
+      if (roundRollCount < 3) { doublesBtn.disabled = true; }
+      else { doublesBtn.disabled = false; }
     }
 
     function populateRoundDropdown() {
